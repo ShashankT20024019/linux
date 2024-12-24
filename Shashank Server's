@@ -1,0 +1,149 @@
+	Service Profile
+
+Server Side
+*********(DNS)**********
+Package     :  bind 
+Daemon      :  named
+port number :  53
+main file   :  /etc/named.conf
+Zone file   :  /var/named/forward.zone
+               /var/named/reverse.zone
+
+Log         :  /var/log/messages  
+>>>> Client Side: 
+1-  /etc/resolv.conf
+        OR
+2-  /etc/sysconfig/network-scripts/ifcfg-ens160  
+
+**********(DHCP)***********
+Server Side:
+
+Package:   dhcp-server 
+Daemon :   dhcpd 
+File   :   /etc/dhcp/dhcpd.conf 
+Log    :   /var/log/messages
+Lease File:  /var/lib/dhcpd/dhcpd.leases
+port number:   67 [ Server Side ] 
+               68 [ Client Side ]
+>>>> Client : 
+
+How to take IP using DHCP server  ?
+
+1-   using  NMCLI   command  
+2-   we can do direct entry in LAN Card or interface protocol.
+     BOOTPROTO=dhcp
+
+*************(NFS)***************
+package:  nfs-utils
+Daemon:   nfs-server { in RHEL-7 + Rhel-8}   
+                     { in rhel-5 + 6 it was only   ==> nfs  }
+
+File:    /etc/nfs.conf
+data sharing file:    /etc/exports 
+Log:   /var/log/messages
+port number:   2049  { NFS    }
+               111   { Portmap }
+>>>> NFS Client Side :
+  NFS mounting method
+Temporary using mount command 
+permanent mounting in  /etc/fstab file
+
+***************(FTP)*****************
+>>>> Server Machine 
+
+Package:   vsftpd 
+Daemon:    vsftpd
+Port number :   21 [ control connection ]
+                20 [ data connection ]
+
+File :   /etc/vsftpd/vsftpd.conf
+
+
+Log File:    /var/log/xferlog  OR  /var/log/vsftpd.log
+Anonymous user ==> /var/ftp/xyz
+valid user ==> valid user 
+types of operation:- 1- GET OR Download
+                     2- PUT OR Upload
+>>>> Client Machine
+
+1-  ftp      5-  firefox 
+2-  lftp     6-  winscp
+3-  wget     7-  many more others tools
+4-  sft
+
+***************(SAMBA)****************
+
+
+
+# Types of samba users :- 
+1- Anonymous or  guest
+2- samba valid  users  ==> smbpasswd 
+
+# Types of section in samba file:-
+1- Default section  
+2- Custom section  
+
+>>>> Service 
+   package:   samba 
+   daemon :   smb 
+   port number:  445  (TCP) 
+              139  (UDP)
+
+   File:    /etc/samba/smb.conf   ==> data sharing  file  
+
+   log:   /var/log/samba/log.smbd    OR   /var/log/samba/smbd.log
+
+>>>> Client Side 
+
+Types of samba server accessing method ?
+1- browser       ===>   smb://192.168.0.10
+2  downloading   +  uploading   ===>  smbclient  ==> package  ==>  samba-client 
+3- mounting      ==> package ==>  cifs-utils
+
+****************(APACHE)******************
+# Service Profile ?
+
+Package name: httpd
+Daemon: httpd
+
+Port number: 80 { http } and 443 { https }
+
+File : /etc/httpd/conf/httpd.conf
+
+Log: /var/log/httpd/access.log
+ /var/log/httpd/error.log
+
+Document root place: /var/www/html 
+
+*******************(MARIADB)*******************
+# Server Side
+
+Package: mariadb-server
+
+Daemon: mariadb
+
+Port number: 3306
+
+File: /etc/my.cnf
+ 
+Log: /var/log/mariadb/mariadb.log
+
+>>>> Types of default users in Mariadb ?
+
+1- Root ==> can be set the password after mariadb installation.
+2- Anonymous ==>  note we should always delete it in production server.
+
+******************(NAGIOS)********************
+
+ports 80 and 443
+
+log_file=/usr/local/nagios/var/nagios.log
+
+Configeration file :-
+/etc/nagios/nagios.cfg
+
+******************(ZABBIX)**********************
+
+ PORT NUMBER:- 10050 for Zabbix 
+
+/etc/zabbix/zabbix_server.conf
