@@ -1,0 +1,86 @@
+Apache configuration part-3
+===============================
+
+
+website ==> open ==>  username + password  ==> prompt ==> match ==> allow otherwise deny
+
+
+================================
+How we can apply usename and password on any website ?
+                 OR
+How we can apply apache authentication on any website ?
+
+
+root@station10 ~]# cd  /var/www/xyz
+[root@station10 xyz]# 
+[root@station10 xyz]# 
+[root@station10 xyz]# ls 
+index.html
+[root@station10 xyz]# vim .htaccess 
+
+authname        "This is my secure web page"
+authtype        basic
+authuserfile    /etc/httpd/xyzpassword
+require  valid-user
+
+
+:wq
+
+[root@station10 xyz]# cd
+[root@station10 ~]# 
+
+[root@station10 ~]# vim  /etc/httpd/conf.d/xyz.conf 
+
+
+<Directory  /var/www/xyz>
+allowoverride authconfig
+require all granted
+</Directory>
+
+
+
+
+:wq
+
+
+[root@station10 ~]# htpasswd -c  -m  /etc/httpd/xyzpassword   sachin  
+New password: 
+Re-type new password: 
+Adding password for user sachin
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# cat  /etc/httpd/xyzpassword
+sachin:$apr1$UIqaZq4u$p5sXoTgNH/Cwn1DTPFIv41
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# htpasswd  -m  /etc/httpd/xyzpassword   soniya  
+New password: 
+Re-type new password: 
+Adding password for user soniya
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# cat  /etc/httpd/xyzpassword
+sachin:$apr1$UIqaZq4u$p5sXoTgNH/Cwn1DTPFIv41
+soniya:$apr1$Sa2QtgLC$yyMNvQJ8cd5HSW82ebtKl/
+[root@station10 ~]# 
+[root@station10 ~]# systemctl restart  httpd 
+[root@station10 ~]# httpd  -t 
+Syntax OK
+[root@station10 ~]# useradd alok  
+[root@station10 ~]# 
+[root@station10 ~]# htpasswd  -m   /etc/httpd/xyzpassword alok   
+New password: 
+Re-type new password: 
+Adding password for user alok
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# cat  /etc/httpd/xyzpassword
+sachin:$apr1$UIqaZq4u$p5sXoTgNH/Cwn1DTPFIv41
+soniya:$apr1$Sa2QtgLC$yyMNvQJ8cd5HSW82ebtKl/
+alok:$apr1$oSY3NV0j$qFJMc.OEtzixOV7N6ZJj/1
+[root@station10 ~]# 
+
+firefox  ==> xyz.example.com  ==> it should be prompt for username and password 
+
+================================
+================================
