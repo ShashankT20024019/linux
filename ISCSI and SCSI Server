@@ -1,0 +1,148 @@
+=============================================================
+
+MACHINE -1 SCSI configuration 
+
+=============================================================  
+
+lsblk
+    2  mount /dev/sr0  /mnt
+    3  lsblk
+    4  cd /mnt
+    5  ls
+    6  cd
+    7  vim /etc/yum.repos.d/myiso.repo
+    8  yum clean all
+    9  yum repolist all
+   10  ifconfig
+   11  yum install targetcli*   -y
+   12  systemctl restart target
+   13  systemctl enable target
+   14  firewall-cmd   --permanent --add-port=3260/tcp
+   15  firewall-cmd   --reload
+   16  netstat -tuple|grep 3260
+   17  fdisk -l
+   18  fdisk /dev/sdb
+   19  partprobe /dev/sdb
+   20  lsblk
+   21  targetcli 
+   22  cat /etc/target/saveconfig.json 
+   23  systemctl restart target
+   24  netstat -tunlp |grep 3260
+   25  history
+
+**************
+TARGETCLI file
+**************
+
+ targetcli 
+ ls
+ /backstores/block create  mydrive1  /dev/sdb1
+ ls
+ - / .............................................................................................................. [...]
+  o- backstores ................................................................................................... [...]
+  | o- block ....................................................................................... [Storage Objects: 1]
+  | | o- mydrive1 ........................................................... [/dev/sdb1 (5.0GiB) write-thru deactivated]
+  | |   o- alua ........................................................................................ [ALUA Groups: 1]
+  | |     o- default_tg_pt_gp ............................................................ [ALUA state: Active/optimized]
+  | o- fileio ...................................................................................... [Storage Objects: 0]
+  | o- pscsi ....................................................................................... [Storage Objects: 0]
+  | o- ramdisk ..................................................................................... [Storage Objects: 0]
+  o- iscsi ................................................................................................. [Targets: 0]
+  o- loopback .............................................................................................. [Targets: 0]
+/> 
+
+ /iscsi create  iqn.2024-10.com.example:disk1
+
+ /iscsi/iqn.2024-10.com.example:disk1/tpg1/acls  create iqn.2024-10.com.example:clientacl
+
+ ls
+ 
+/iscsi/iqn.2024-10.com.example:disk1/tpg1/luns  create /backstores/block/mydrive1 
+
+ ls
+ 
+saveconfig
+************************************************************************
+/iscsi/iqn.2024-10.com.example:disk1/tpg1/portals  create 192.168.0.106
+Using default IP port 3260
+Could not create NetworkPortal in configFS
+  
+saveconfig
+
+
+cat /etc/target/saveconfig.json 
+===============================================================
+
+MACHINE -2 iscsi configuration
+
+===============================================================
+
+hostname
+    2  ifonfig
+    3  ifconfig
+    4  ping 192.168.0.191
+    5  lsblk
+    6  ifconfig
+    7  ping 192.168.0.191
+    8  rpm -qa iscsi*
+    9  yum install iscsi*
+   10  vim /etc/iscsi/initiatorname.iscsi
+   11  vim /etc/iscsi/iscsid.conf 
+   12  vim /etc/iscsi/initiatorname.iscsi
+   13  which iscsiadm
+   14  iscsiadm  -m discovery -t st   -p  192.168.0.106
+   15  lsblk
+   16  iscsiadm -m node -T  iqn.2024-10.com.example:disk1 -l
+   17  lsblk
+   18  lsblk -fs
+   19  lsblk -S
+   20  fdisk -l
+   21  lsblk -l
+   22  dmesg
+   23  dmesg |grep -i Attached
+   24  fdisk /dev/sdb
+   25  lablk
+   26  lsblk
+   27  partprobe /dev/sdb
+   28  lsblk
+   29  mkfs.xfs   /dev/sdb1
+   30  mkdir /job
+   31  mount /dev/sdb1  /job
+   32  lsblk
+   33  vim /etc/fstab
+   34  systemctl daemon-reload 
+   35  mount -a
+   36  df -h
+   37  cp -rf /etc  /job
+   38  df -h
+   39  umount /job
+   40  mount -a
+   41  lsblk
+   42  iscsiadm -m session -P 0
+   43  iscsiadm -m session -P 1
+   44  iscsiadm -m session -P 2
+   45  iscsiadm -m session -P 3
+   46  umount /job
+   47  vim /etc/fstab
+   48  systemctl daemon-reload 
+   49  mount -a
+   50  df -h
+   51  ls /job
+   52  lsblk
+   53  iscsiadm -m node -T  iqn.2024-10.com.example:disk1 -u
+   54* 
+   55  lsblk
+   56  fdssk -l
+   57  fdisk -l
+   58  iscsiadm  -m discovery -t st   -p  192.168.0.106
+   59  iscsiadm -m node -T  iqn.2024-10.com.example:disk1 -l
+   60  lsblk'
+
+
+   61  lsblk
+   62  mount /dev/sdb1  /job
+   63  ls /job
+   64  vim /etc/fstab
+   65  systemctl daemon-reload 
+   66  df -Th
+   67  history
