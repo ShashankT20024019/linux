@@ -1,0 +1,79 @@
+yum clean all
+    4  yum repolist all
+    5  yum install dhcp-server* -y
+    6  hostname
+    7  ip r
+    8  yum install syslinux* -y
+    9  yum install tftp* -y
+   10  vim /etc/dhcp/dhcpd.conf 
+subnet 192.168.1.0 netmask 255.255.255.0 {
+        range 192.168.1.5 192.168.1.50;
+        default-lease-time 600;
+        max-lease-time 7200;
+        next-server 192.168.1.9;
+        filename "pxelinux.0";
+}
+systemctl restart dhcpd
+   24  systemctl enable dhcpd
+   25  systemctl status dhcpd
+mkdir /DVD
+   34  cd /run/media/root/RHEL-9-0-0-BaseOS-x86_64/
+cp -rf * /DVD/
+   36  cd
+   37  cp /usr/share/syslinux/pxelinux.0 /var/lib/tftpboot/
+   38  cp /usr/share/syslinux/menu.c32 /var/lib/tftpboot/
+   39  cp /usr/share/syslinux/memdisk /var/lib/tftpboot/
+   40  cd /var/lib/tftpboot/
+   41  cd
+   42  mkdir /var/lib/tftpboot/pxelinux.cfg
+   43  touch /var/lib/tftpboot/pxelinux.cfg/default
+   44  vim /var/lib/tftpboot/pxelinux.cfg/default
+default menu.c32
+prompt 0
+timeout 300
+ONTIMEOUT local
+
+menu title ####### this is shashank pxe boot server ########
+label 1
+menu label ^1) Install RHEL 9
+kernel rhel9/vmlinuz
+append initrd=rhel9/initrd.img inst.stage2=ftp://192.168.1.9/pub
+
+
+   45  cd /var/lib/tftpboot/pxelinux.cfg/default
+   46  cd /var/lib/tftpboot/
+   47  ls
+   48  mkdir rhel9
+   49  cd
+   50  mv /DVD/* /var/ftp/pub
+   51  systemctl restart vsftpd
+   52  systemctl restart vsftp
+   53  systemctl restart ftp
+   54  yum install vsftpd* -y
+   55  systemctl status vsftpd
+   56  yum install vsftpd* -y
+systemctl restart vsftpd.service 
+   63  systemctl restart vsftpd.service --now
+   64  mv /DVD/* /var/ftp/pub/
+   65  cp /var/ftp/pub/images/pxeboot/vmlinuz /var/lib/tftpboot/rhel9/
+   66  cp /var/ftp/pub/images/pxeboot/initrd.img /var/lib/tftpboot/rhel9/
+   67  systemctl restart dhcpd
+   68  systemctl enable dhcpd
+   69  systemctl start dhcpd
+   70  systemctl status dhcpd
+   71  q
+   72  systemctl restart vsftpd.service 
+   73  systemctl enable vsftpd.service 
+   74  systemctl start vsftpd.service 
+   75  systemctl status vsftpd.service 
+   76  systemctl restart tftp.service 
+   77  systemctl enable tftp.service 
+   78  systemctl start tftp.service 
+   79  systemctl status tftp.service 
+   80  q
+   81  firewall-cmd --permanent --add-service=dhcp
+   82  firewall-cmd --permanent --add-service=ftp 
+   83  firewall-cmd --permanent --add-service=tftp 
+   84  firewall-cmd --reload 
+   85  chmod 644 /var/ftp/pub/ks.cfg
+   86  systemctl restart vsftpd.service
