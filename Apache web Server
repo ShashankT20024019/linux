@@ -1,0 +1,554 @@
+Machine-1
+==================================
+Task-1 How we can configure Web Server
+==================================
+[root@station10 ~]# history 
+    1  hostname
+    2  ifconfig 
+    3  yum repolist
+    4  history 
+    5  yum install httpd  -y 
+    6  systemctl  start  httpd 
+    7  systemctl  enable    httpd 
+    8  systemctl is-active httpd  
+    9  firewall-cmd  --permanent  --list-services 
+   10  firewall-cmd  --permanent  --add-service=http
+   11  firewall-cmd --reload  
+   12  firewall-cmd  --permanent  --list-services 
+   13  netstat -tunlp | grep httpd  
+   14  grep -i -n listen  /etc/httpd/conf/httpd.conf 
+   15  grep -i -n documentroot   /etc/httpd/conf/httpd.conf 
+   16  grep -i -n directoryindex   /etc/httpd/conf/httpd.conf 
+   17  history 
+[root@station10 ~]# cd  /var/www/html
+[root@station10 html]# 
+[root@station10 html]# ls
+[root@station10 html]# 
+[root@station10 html]# vim  index.html
+<html>
+        <title> KR Network Cloud  </title>
+        <body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+        </body>
+</html>
+
+:wq
+
+   21  cat index.html 
+   22  cd
+   23  systemctl reload httpd  
+   24  httpd  -t 
+   25  httpd  -v
+   26  hostname
+   27  ifconfig 
+ [root@station10 ~]# vim  /etc/hosts
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+
+
+192.168.0.10    station10.example.com   example.com
+
+:wq
+
+   30  ping station10.example.com  
+   31  ping example.com 
+
+
+Using GUI ?
+# firefox
+
+http://station10.example.com 
+     OR
+http://example.com
+    OR
+http://192.168.0.10
+
+
+Using CLI ?
+
+
+[root@station10 ~]# which curl 
+/usr/bin/curl
+[root@station10 ~]# curl  http://station10.example.com
+<html>
+	<title> KR Network Cloud  </title>
+	<body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+	</body>
+</html>
+[root@station10 ~]# 
+[root@station10 ~]# 
+
+========================================
+Task-2  Now we are going to configure web hosting ?
+========================================
+
+
+[root@station10 ~]# cd /var/www
+[root@station10 www]# ls
+cgi-bin  html
+[root@station10 www]# 
+[root@station10 www]# mkdir google
+[root@station10 www]# 
+[root@station10 www]# mkdir yahoo
+[root@station10 www]# ls
+cgi-bin  google  html  yahoo
+[root@station10 www]# 
+[root@station10 www]# cd google
+[root@station10 google]# 
+[root@station10 google]# 
+[root@station10 google]# echo "this is my google testing web page"  > google.html   
+[root@station10 google]# 
+[root@station10 google]# ls
+google.html
+[root@station10 google]# 
+[root@station10 google]# cat google.html 
+this is my google testing web page
+[root@station10 google]# 
+[root@station10 google]# cd ..
+[root@station10 www]# 
+[root@station10 www]# cd yahoo
+[root@station10 yahoo]# echo "this is my yahoo testing web page"  > yahoo.html
+[root@station10 yahoo]# ls
+yahoo.html
+[root@station10 yahoo]# cd ..
+[root@station10 www]# ls
+cgi-bin  google  html  yahoo
+[root@station10 www]# cd
+[root@station10 ~]# 
+[root@station10 ~]# vim  /etc/httpd/conf/httpd.conf
+
+go in bottom of this file and add these lines.....
+
+
+
+
+<VirtualHost 192.168.0.10:80>
+ServerAdmin  root@station10.example.com
+DocumentRoot /var/www/html
+ServerName   station10.example.com
+ServerAlias  example.com
+</VirtualHost>
+<VirtualHost 192.168.0.10:80>
+ServerAdmin root@station10.example.com
+DocumentRoot /var/www/google
+DirectoryIndex google.html
+ServerName   google.example.com
+ServerAlias  google.com
+CustomLog    "logs/google_access_log"  combined
+ErrorLog     "logs/google_error_log"
+</VirtualHost>
+<VirtualHost 192.168.0.10:80>
+ServerAdmin root@station10.example.com
+DocumentRoot /var/www/yahoo
+DirectoryIndex yahoo.html
+ServerName   yahoo.example.com
+ServerAlias  yahoo.com
+CustomLog    "logs/yahoo_access_log"  combined 
+ErrorLog     "logs/yahoo_error_log"
+</VirtualHost>
+
+<Directory  /var/www/google>
+require all granted
+</Directory>
+<Directory  /var/www/yahoo>
+require all granted
+</Directory>
+
+:wq
+
+
+[root@station10 ~]# systemctl restart  httpd  
+[root@station10 ~]# httpd  -t 
+Syntax OK
+[root@station10 ~]#
+[root@station10 ~]# ping google.example.com
+ping: google.example.com: Name or service not known
+[root@station10 ~]# 
+[root@station10 ~]# ping yahoo.example.com
+ping: yahoo.example.com: Name or service not known
+[root@station10 ~]# 
+ 
+Testing ==> Method -1  using  /etc/hosts  OR without DNS server Concept
+
+
+#vim /etc/hosts 
+
+
+192.168.0.10    station10.example.com   example.com
+192.168.0.10    google.example.com      google.com
+192.168.0.10    yahoo.example.com       yahoo.com
+
+
+:wq
+
+
+[root@station10 ~]# ping station10.example.com
+PING station10.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.071 ms
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.067 ms
+^C
+--- station10.example.com ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 45ms
+rtt min/avg/max/mdev = 0.067/0.069/0.071/0.002 ms
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# ping google.example.com 
+PING google.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.065 ms
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.169 ms
+^C
+--- google.example.com ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 62ms
+rtt min/avg/max/mdev = 0.065/0.117/0.169/0.052 ms
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# ping yahoo.example.com 
+PING yahoo.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.051 ms
+^C
+--- yahoo.example.com ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.051/0.051/0.051/0.000 ms
+[root@station10 ~]# firefox
+
+
+http://station10.example.com
+
+http://google.example.com
+
+
+http://yahoo.example.com
+
+[root@station10 ~]# curl  http://google.example.com 
+this is my google testing web page
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# curl  http://yahoo.example.com 
+this is my yahoo testing web page
+[root@station10 ~]# 
+[root@station10 ~]# curl  http://station10.example.com 
+<html>
+	<title> KR Network Cloud  </title>
+	<body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+	</body>
+</html>
+[root@station10 ~]# 
+
+=============================
+How we can test these websites on client machine without dns server concept ?
+
+============================
+[root@station20 ~]# vim /etc/hosts 
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+
+
+
+192.168.0.10      station10.example.com   example.com
+192.168.0.10     google.example.com       google.com
+192.168.0.10     yahoo.example.com       yahoo.com
+
+:wq
+
+ [root@station20 ~]# firefox
+
+
+http://station10.example.com
+
+http://google.example.com
+
+
+http://yahoo.example.com
+
+[root@station20 ~]# curl  http://google.example.com 
+this is my google testing web page
+[root@station20 ~]# 
+[root@station20 ~]# 
+[root@station20 ~]# curl  http://yahoo.example.com 
+this is my yahoo testing web page
+[root@station20 ~]# 
+[root@station20 ~]# curl  http://station10.example.com 
+<html>
+	<title> KR Network Cloud  </title>
+	<body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+	</body>
+</html>
+[root@station20 ~]#                                                                                                
+                                                  
+=========================================
+again come back on server machine
+=========================================
+Now test these websites using DNS concept
+=========================================
+
+Remove the all entry from your /etc/hosts file.
+
+[root@station10 ~]# cd /var/named
+[root@station10 named]# ls
+data     forward.zone  named.empty      named.loopback  slaves
+dynamic  named.ca      named.localhost  reverse.zone
+[root@station10 named]# 
+[root@station10 named]# vim forward.zone 
+
+$TTL 1D
+@       IN SOA  station10.example.com.    root.station10.example.com.  (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+                NS      station10.example.com.
+station10       A       192.168.0.10
+station20       A       192.168.0.20
+station1        A       192.168.0.1
+station2        A       192.168.0.2
+station3        A       192.168.0.3
+dnsmaster       CNAME   station10
+google          A       192.168.0.10
+yahoo           A       192.168.0.10
+
+
+:wq
+
+[root@station10 named]# vim reverse.zone
+$TTL 1D
+@       IN SOA  station10.example.com.   station10.example.com.  (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+                NS      station10.example.com.
+10              PTR     station10.example.com.
+20              PTR     station20.example.com.
+1               PTR     station1.example.com.
+2               PTR     station2.example.com.
+3               PTR     station3.example.com.
+10              PTR     google.example.com.
+10              PTR     yahoo.example.com.
+
+:wq
+
+
+[root@station10 ~]# systemctl  restart  named  
+[root@station10 ~]# 
+[root@station10 ~]# cat  /etc/resolv.conf 
+search example.com
+nameserver	192.168.0.10
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]#
+[root@station10 ~]# ping google.example.com 
+PING google.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from google.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.022 ms
+64 bytes from google.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.057 ms
+64 bytes from google.example.com (192.168.0.10): icmp_seq=3 ttl=64 time=0.182 ms
+64 bytes from google.example.com (192.168.0.10): icmp_seq=4 ttl=64 time=0.054 ms
+64 bytes from google.example.com (192.168.0.10): icmp_seq=5 ttl=64 time=0.051 ms
+^C
+--- google.example.com ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 119ms
+rtt min/avg/max/mdev = 0.022/0.073/0.182/0.056 ms
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# ping yahoo.example.com 
+PING yahoo.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.026 ms
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.115 ms
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=3 ttl=64 time=0.107 ms
+^C
+--- yahoo.example.com ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 37ms
+rtt min/avg/max/mdev = 0.026/0.082/0.115/0.041 ms
+[root@station10 ~]# firefox 
+[root@station10 ~]# firefox
+
+
+http://station10.example.com
+
+http://google.example.com
+
+
+http://yahoo.example.com
+
+[root@station10 ~]# curl  http://google.example.com 
+this is my google testing web page
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# curl  http://yahoo.example.com 
+this is my yahoo testing web page
+[root@station10 ~]# 
+[root@station10 ~]# curl  http://station10.example.com 
+<html>
+	<title> KR Network Cloud  </title>
+	<body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+	</body>
+</html>
+[root@station10 ~]# 
+
+
+=================================
+Client Side
+=================================
+Remote all entry from /etc/hosts file
+
+[root@station20 ~]# cat /etc/resolv.conf 
+search example.com
+nameserver	192.168.0.10
+nameserver      192.168.0.20
+[root@station20 ~]# 
+[root@station20 ~]# 
+[root@station20 ~]# ping google.example.com 
+PING google.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from google.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=1.15 ms
+64 bytes from google.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.233 ms
+^C
+--- google.example.com ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 2ms
+rtt min/avg/max/mdev = 0.233/0.691/1.150/0.459 ms
+[root@station20 ~]# 
+[root@station20 ~]# ping yahoo.example.com 
+PING yahoo.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.149 ms
+^C
+--- yahoo.example.com ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 0.149/0.149/0.149/0.000 ms
+[root@station20 ~]# firefox
+
+
+http://station10.example.com
+
+http://google.example.com
+
+
+http://yahoo.example.com
+
+[root@station20 ~]# curl  http://google.example.com 
+this is my google testing web page
+[root@station20 ~]# 
+[root@station20 ~]# 
+[root@station20 ~]# curl  http://yahoo.example.com 
+this is my yahoo testing web page
+[root@station20 ~]# 
+[root@station20 ~]# curl  http://station10.example.com 
+<html>
+	<title> KR Network Cloud  </title>
+	<body>
+
+       <marquee> Red Hat Training centre  </marquee>
+
+
+
+	</body>
+</html>
+[root@station20 ~]# 
+
+======================================
+Again Come back on server machine
+======================================
+Note:- if you don't DNS Server please ignore this steps, you can use /etc/hosts file concept
+======================================
+Next Task
+======================================
+How we can run any website on any another port number ?  port number==> 85
+====================================== 
+
+   85  netstat -tunlp | grep httpd
+   86  netstat -tunlp | grep 80 
+   87  netstat -tunlp | grep 85
+
+
+[root@station10 ~]# vim  /etc/httpd/conf/httpd.conf 
+
+ 45 Listen 80
+ 46 Listen 85
+
+go in bottom and change port number of any one web site
+
+
+<VirtualHost 192.168.0.10:85>
+
+:wq
+
+[root@station10 ~]# systemctl restart  httpd 
+Job for httpd.service failed because the control process exited with error code.
+See "systemctl status httpd.service" and "journalctl -xe" for details.
+[root@station10 ~]# 
+[root@station10 ~]# getenforce 
+Enforcing
+[root@station10 ~]# 
+[root@station10 ~]# semanage port  -l  | grep http
+http_cache_port_t              tcp      8080, 8118, 8123, 10001-10010
+http_cache_port_t              udp      3130
+http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000
+pegasus_http_port_t            tcp      5988
+pegasus_https_port_t           tcp      5989
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# semanage  port  -a -t  http_port_t  -p  tcp  85  
+[root@station10 ~]# 
+[root@station10 ~]# semanage port  -l  | grep http
+http_cache_port_t              tcp      8080, 8118, 8123, 10001-10010
+http_cache_port_t              udp      3130
+http_port_t                    tcp      85, 80, 81, 443, 488, 8008, 8009, 8443, 9000
+pegasus_http_port_t            tcp      5988
+pegasus_https_port_t           tcp      5989
+[root@station10 ~]# 
+[root@station10 ~]# firewall-cmd  --permanent  --add-port=85/tcp
+success
+[root@station10 ~]# firewall-cmd --reload  
+success
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# systemctl restart  httpd   
+[root@station10 ~]# 
+[root@station10 ~]# netstat -tunlp | grep httpd
+tcp6       0      0 :::85                   :::*                    LISTEN      45990/httpd         
+tcp6       0      0 :::80                   :::*                    LISTEN      45990/httpd         
+
+# firefox
+
+http://yahoo.example.com:85
+
+[root@station10 ~]# curl  http://yahoo.example.com:85
+this is my yahoo testing web page
+[root@station10 ~]# 
+
+
+===============================================
+
+
+
+
+
+
+
