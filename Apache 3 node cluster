@@ -1,0 +1,158 @@
+
+APACHE WITH # NODE CLUSTER
+
+
+ping google.com
+   13  yum install nfs* -y
+   14  ip a
+   15  mkdir /data
+   16  cd /data/
+   17  vim index.html
+   18  echo "/data *(rw)" | sudo tee -a /etc/exports
+   19  cat /etc/exports
+   20  exportfs  -rs
+   22  sudo systemctl start nfs-server
+   23  sudo systemctl enable nfs-server
+   24  cat /etc/exports
+   25  vim /etc/exports
+   26  exportfs  -rs
+   27  sudo exportfs -v
+   28  sudo firewall-cmd --permanent --add-service=nfs
+   29  sudo firewall-cmd --permanent --add-service=mountd
+   30  sudo firewall-cmd --permanent --add-service=rpc-bind
+   31  sudo firewall-cmd --reload
+
+  32  yum install nginx -y
+   33  systemctl start nginx.service 
+   34  systemctl enable nginx.service 
+   35  vim /etc/nginx/nginx.conf
+   36  systemctl restart nginx.service 
+   37  nginx -v
+   38  nginx -t
+   39  getenforce 
+   40  setenforce 0
+   41  getenforce 
+   42  vim /etc/nginx/nginx.conf
+
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+
+# Load dynamic modules
+include /usr/share/nginx/modules/*.conf;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile            on;
+    tcp_nopush          on;
+    tcp_nodelay         on;
+    keepalive_timeout   65;
+    types_hash_max_size 4096;
+
+    include             /etc/nginx/mime.types;
+    default_type        application/octet-stream;
+
+    # Load modular configuration files from the /etc/nginx/conf.d directory
+    include /etc/nginx/conf.d/*.conf;
+
+    # Define upstream backend servers for load balancing
+    upstream backend_servers {
+        # Define backend servers for load balancing
+        server 192.168.1.27;  # First backend server
+        server 192.168.1.28;  # Second backend server
+
+        # Optional: configure load balancing algorithm
+        # least_conn;  # Uncomment this to use least connections
+        # ip_hash;     # Uncomment this to ensure session persistence
+    }
+
+    # Default server block for HTTP requests
+    server {
+        listen       80;
+        listen       [::]:80;
+        server_name  _;
+
+        # Root directory for the server
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block
+        include /etc/nginx/default.d/*.conf;
+
+        # Main location block to forward requests to backend servers
+        location / {
+            proxy_pass http://backend_servers;  # Forward requests to the upstream group
+            proxy_set_header Host $host;  # Pass the original host header to the backend
+            proxy_set_header X-Real-IP $remote_addr;  # Pass the real client IP
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  # Forward the client IP
+            proxy_set_header X-Forwarded-Proto $scheme;  # Pass the protocol (http or https)
+        }
+
+        # Error handling
+        error_page 404 /404.html;
+        location = /404.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+        }
+    }
+
+}  # Close the 'http' block here
+
+     #  systemctl start nginx
+    # systemctl enable nginx
+   #  systemctl status nginx
+
+   # curl http://192.168.1.27
+   # curl localhost
+
+   # systemctl stop firewalld.service 
+   # systemctl disable firewalld.service 
+
+###########################################################
+
+CLIENT - 1
+##############################################################
+
+# yum install -y nfs-utils
+# yum install httpd
+
+# cat /var/www/html
+# mount 192.168.1.24:/data /var/www/html
+
+# df -h
+
+# getenforce 
+# setenforce 0
+
+# echo "192.168.1.24:/data /var/www/html nfs defaults 0 0" | tee -a 
+
+# cat /etc/fstab
+ 
+
+############################################################
+
+CLIENT - 2
+############################################################# 
+
+# yum install -y nfs-utils
+
+# yum install httpd -y
+
+# mount 192.168.1.24:/data /var/www/html
+
+# df -h
+
+#  echo "192.168.1.24:/data /var/www/html nfs defaults 0 0" | tee -a /etc/fstab
+
