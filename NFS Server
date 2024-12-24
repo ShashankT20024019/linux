@@ -1,0 +1,131 @@
+  48  ifconfig 
+   49  mkdir /redhatdvd  
+   50  lsblk  
+   51  cd /run/media/root/RHEL-8-0-0-BaseOS-x86_64
+   52  ls
+   53  cp -rf  *   /redhatdvd
+   54  cd
+   55  ls /redhatdvd
+   56  eject  
+   57  lsblk 
+   58  ls  /redhatdvd
+   59  cd /etc/yum.repos.d
+   60  ls
+   61  vim dvd.repo  
+   62  cd
+   63  yum clean all
+   64  yum repolist
+   65  ls /redhatdvd
+   66  yum install  nfs*  -y  
+   67  systemctl start  nfs-server
+   68  systemctl enable  nfs-server
+   69  systemctl is-active firewalld
+   70  firewall-cmd   --permanent  --add-service=nfs
+   71  firewall-cmd   --permanent  --add-service=mountd 
+   72  firewall-cmd   --permanent  --add-service=rpc-bind 
+   73  cat /etc/exports
+   74  ls  /
+   75  vim /etc/exports
+   76  systemctl restart nfs-server
+   77  exportfs 
+   78  exportfs -r  
+   79  netstat -tunlp  | grep  2049
+   80  netstat -tunlp  | grep  111
+   81  showmount  -e  192.168.0.10
+      [root@node10 ~]# firewall-cmd   --reload  
+      success
+
+   82  history 
+======================
+Client Side
+  1  ifconfig 
+    2  ping 192.168.0.10
+    3  showmount  -e  192.168.0.10 
+    4  ifconfig 
+    5  showmount  -e  192.168.0.10 
+    6  mkdir  /yum 
+    7  mount  192.168.0.10:/redhatdvd   /yum  
+    8  ls  /yum 
+    9  touch  /yum/abc  
+   10  vim /etc/yum.repos.d/yum-new.repo 
+   11  cd
+   12  yum clean all
+   13  yum repolist
+   14  lsblk  
+   15  df -Th  
+  17  history 
+   18  vim /etc/fstab 
+   19  systemctl daemon-reload  
+   20  df -Th 
+   21  reboot  [ tesing]
+
+======================
+Server Side
+======================
+   89  mkdir  /javaread  
+   90  mkdir  /javawrite  
+   91  touch  /javaread/abc{1..4}
+   92  touch  /javawrite/xyz{1..5}
+   93  echo hello india >  /javaread/abc1
+   94  echo hello wolrd >  /javawrite/xyz1 
+   95  ls  /
+   96  chmod  777  /javawrite
+   97  vim /etc/exports
+   98  exportfs -r  
+   99  exportfs
+  100  showmount  -e 192.168.0.10
+  101  ls  /javaread
+  102  ls  /javawrite
+
+==========================
+
+Client side 
+========================
+
+   54  showmount  -e 192.168.0.10
+   55  mkdir  /data-1
+   56  mkdir  /data-2
+   57  mount  192.168.0.10:/javaread   /data-1
+   58  mount -t  nfs    192.168.0.10:/javawrite   /data-2
+   59  ls /data-1
+   60  ls /data-2
+   61  cat /data-1
+   62  cat /data-1/abc1
+   63  cat /data-2/xyz1 
+   64  cd /data-1
+   65  ls
+   66  cat abc1
+   67  cp -rf *   /tmp 
+   68  touch abc5
+   69  cp /etc/passwd  /data-1
+   70  cd
+   71  cd /data-2
+   72  ls
+   73  cat xyz
+   74  cat xyz1
+   75  touch xyz6
+   76  cp -rf  /etc/passwd  /data-2 
+   77  cp -rf /home /data-2
+   78  ls
+   79  cd
+   80  umount /data-1
+   81  umount /data-2
+   82  ls  /data-1
+   83  ls  /data-2
+   84  mount  192.168.0.10:/javaread   /data-1
+   85  mount  192.168.0.10:/javawrite    /data-2
+   86  cd /tmp 
+   87  ls
+   88  vim abc1 
+   89  cd
+   90  cat /tmp/abc1
+   91  vim /etc/fstab 
+   92  systemctl daemon-reload
+   93  df -Th 
+   94  history 
+
+================
+How we can disconnet NFS client 
+===============
+
+
