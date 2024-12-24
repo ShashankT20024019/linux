@@ -1,0 +1,70 @@
+Apache-Part-2
+===============================================
+How we can configure one more website using another conf file rather then changes in
+original configuration file.
+
+[root@station10 ~]# cd /var/www
+[root@station10 www]# 
+[root@station10 www]# ls
+cgi-bin  google  html  yahoo
+[root@station10 www]# 
+[root@station10 www]# 
+[root@station10 www]# mkdir xyz  
+[root@station10 www]# 
+[root@station10 www]# cd xyz
+[root@station10 xyz]# 
+[root@station10 xyz]# echo  "hello xyz web page" > index.html 
+[root@station10 xyz]# 
+[root@station10 xyz]# ls
+index.html
+[root@station10 xyz]# 
+[root@station10 xyz]# cat index.html 
+hello xyz web page
+[root@station10 xyz]# cd
+[root@station10 ~]# 
+[root@station10 ~]# 
+
+[root@station10 ~]# vim /etc/httpd/conf.d/xyz.conf
+
+<VirtualHost  192.168.0.10:80>
+ServerAdmin root@station10.example.com
+DocumentRoot /var/www/xyz
+ServerName   xyz.example.com
+ServerAlias  xyz.com
+CustomLog    "logs/xyz_access_log"  combined
+ErrorLog     "logs/xyz_error_log"
+</VirtualHost>
+<Directory  /var/www/xyz>
+require all granted
+</Directory>
+
+:wq
+
+[root@station10 ~]# systemctl   restart  httpd
+[root@station10 ~]# 
+[root@station10 ~]# httpd  -t  
+Syntax OK
+[root@station10 ~]# 
+[root@station10 ~]# 
+[root@station10 ~]# vim /etc/hosts
+
+192.168.0.10    station10.example.com   example.com
+192.168.0.10    google.example.com      google.com
+192.168.0.10    yahoo.example.com       yahoo.com
+192.168.0.10    xyz.example.com        xyz.com
+
+:wq
+[root@station10 ~]# ping xyz.example.com
+PING xyz.example.com (192.168.0.10) 56(84) bytes of data.
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=1 ttl=64 time=0.047 ms
+64 bytes from station10.example.com (192.168.0.10): icmp_seq=2 ttl=64 time=0.067 ms
+^C
+--- xyz.example.com ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 43ms
+rtt min/avg/max/mdev = 0.047/0.057/0.067/0.010 ms
+[root@station10 ~]# 
+[root@station10 ~]# curl  http://xyz.example.com 
+hello xyz web page
+[root@station10 ~]# 
+[root@station10 ~]# firefox 
+
