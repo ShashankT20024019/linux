@@ -1,0 +1,115 @@
+=======================================
+DHCP Configuration
+=======================================
+[root@node10 ~]# history 
+    1  hostname
+    2  hostnamectl 
+    3  hostnamectl  set-hostname  node10.example.com
+    4  hostname
+    5  cat  /etc/hostname 
+    6  exit
+    7  hostname
+    8  ifconfig 
+    9  nmcli connection show 
+   10  cat  /etc/sysconfig/network-scripts/ifcfg-ens160 
+   11  nmcli connection show 
+   12  nmcli connection delete ens160
+   13  nmcli connection show 
+   14  ifconfig 
+   15  nmcli connection add con-name ens160 ifname ens160 type ethernet autoconnect yes ip4  192.168.0.10/24  
+   16  nmcli connection show 
+   17  cat  /etc/sysconfig/network-scripts/ifcfg-ens160 
+   18  ifconfig 
+   19  hostname
+   20  ifconfig 
+   21  ping 192.168.0.20
+   22  ping -c 2  192.168.0.20
+   23  ping localhost
+   24  ping localhost.localdomain
+   25  ping node20.example.com 
+   26  vim  /etc/hosts  
+   27  ping node10.example.com 
+   28  ping node10 
+   29  ping machine10
+   30  ping station10
+   31  ping node20.example.com
+   32  ping node20
+   33  hostname 
+   34  hostname -i 
+   35  hostname -a
+   36  hostname -d
+   37  hostname -f
+   38  hostname -s
+   39  ping 192.168.0.20
+   40  ssh   root@192.168.0.20
+   41  hostname
+   42  ifconfig 
+   43  vim /etc/hosts
+   44  ping node20.example.com
+   45  lsblk 
+   46  mount  /dev/sr0 /mnt  
+   47  ls  /mnt
+   48  ls  /mnt/AppStream
+   49  ls  /mnt/BaseOS
+   50  vim /etc/yum.repos.d/xyz.repo
+   51  cd
+   52  yum clean all
+   53  yum repolist
+   54  yum install bind  -y
+   55  ll  /etc/named.conf 
+   56  grep  named  /etc/passwd
+   57  grep  named  /etc/group 
+   58  vim /etc/named.conf 
+   59  cat -n  /etc/named.rfc1912.zones 
+   60  sed -n '19,23p;31,35p'  /etc/named.rfc1912.zones 
+   61  vim /etc/named.conf 
+   62  ls /var/named
+   63  vim /etc/named.conf 
+   64  cat   /etc/named.conf 
+   65  cd  /var/named
+   66  ll
+   67  cp  named.localhost forward.zone 
+   68  cp  named.loopback reverse.zone
+   69  ll
+   70  chgrp named forward.zone 
+   71  chgrp named reverse.zone 
+   72  ll
+   73  vim forward.zone 
+   74  vim reverse.zone 
+   75  cat forward.zone 
+   76  cat reverse.zone 
+   77  cd
+   78  cat  /etc/named.conf 
+   79  cat /var/named/forward.zone 
+   80  cat /var/named/reverse.zone 
+   81  firewall-cmd  --permanent   --add-service=dns  
+   82  firewall-cmd  --reload  
+   83  systemctl restart named 
+   84  systemctl enable named 
+   85  netstat -tunlp  | grep  named 
+   86  vim /etc/resolv.conf 
+   87  cat  /etc/hosts
+   88  ping node10.example.com 
+   89  ping dnsmaster 
+   90  nslookup  node10.example.com 
+   91  nslookup  192.168.0.10
+   92  host  192.168.0.10
+   93  host node10.example.com
+   94  nslookup  dnsmaster
+   95  dig node10.example.com 
+   96  dig -x 192.168.0.10
+   97  history 
+=======================
+Client Side
+=======================
+   29  hostname
+   30  ifconfig 
+   31  vim /etc/resolv.conf 
+   32  ping node10.example.com 
+   33  ping node20.example.com 
+   34  ping dnsmaster
+   35  nslookup dnsmaster
+   36  nslookup node10.example.com
+   37  ifconfig 
+
+=========================
