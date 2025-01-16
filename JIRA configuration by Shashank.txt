@@ -1,0 +1,96 @@
+@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@##@
+JIRA SERVER DEPOLYMENT IIN RHEL-9 / CEONTOS -9 
+@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@#@##@#@#@#@#@#@
+
+ >>> First Update Your System with epel repository
+
+##### Install OpenJDK 11 #####
+
+      # sudo dnf install java-11-openjdk-devel -y
+      # java -version
+
+##### Install and Configure PostgreSQL OR you can also use MySQL #####
+
+	# sudo dnf install postgresql-server postgresql-contrib -y
+
+## Now Initialize the Database ##
+	
+	# sudo postgresql-setup --initdb
+	# sudo systemctl enable --now postgresql
+	# sudo -i -u postgres
+	# createuser jiraconfuser --pwprompt
+	# createdb jiradb --owner=jiraconfuser
+	# exit
+##### Configure PostgreSQL to Accept Connections #####
+
+	# vim /var/lib/pgsql/data/pg_hba.conf
+	
+	: now add these lines in this file
+host    jiradb          jiraconfuser    127.0.0.1/32    md5
+host    jiradb          jiraconfuser    ::1/128         md5
+
+	# sudo systemctl restart postgresql
+
+##### Download and Install Jira #####
+
+	# wget https://product-downloads.atlassian.com/software/jira/downloads/atlassian-jira-software-9.12.11-x64.bin
+	# chmod +x atlassian-jira-software-9.12.11-x64.bin
+	# sudo mv atlassian-jira-software-9.12.11-x64.bin /opt/
+	# sudo ./atlassian-jira-software-9.12.11-x64.bin
+
+NOTE 1 :Press the [Enter] Key to continue
+NOTE 2 :(Press 1 and Enter key)
+NOTE 3 :Press the [Enter] Key to continue
+NOTE 4 :press the y and Enter key to continue
+NOTE 5 :Press the y and Enter key to continue
+
+##### Open Firewall Port 8080 #####
+
+	# sudo firewall-cmd --permanent --add-port=8080/tcp
+	# sudo firewall-cmd --reload
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+@#@#@#@#@#@#@#@#@# Implementing SSL/TLS on Jira @#@#@#@#@#@#@#@#@#@#@
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+  NOTE : =====> Ensure You Have the Required Files
+
+======>	jira.dev.naijalabs.net.key (the private key)
+======>	jira.dev.naijalabs.net.crt (the signed certificate)
+======>	intermediate-ca.crt (the CA’s intermediate certificate)
+======>	root-ca.crt (the CA’s root certificate)
+
+  NOTE :=====>	Combine Certificates
+
+
+	# cat jira.dev.naijalabs.net.crt intermediate-ca.crt root-ca.crt > fullchain.crt
+	
+	NOTE :=====> Convert to PKCS12
+
+	# sudo openssl pkcs12 -export -in fullchain.crt -inkey jira.dev.naijalabs.net.key -out jira.dev.naijalabs.net.p12 -name jira
+
+   NOTE :=====> Import into Java Keystore
+
+	# sudo keytool -importkeystore -srckeystore jira.dev.naijalabs.net.p12 -srcstoretype PKCS12 -destkeystore jira.dev.naijalabs.net.keystore -deststoretype JKS -alias jira
+
+	# sudo keytool -list -v -keystore jira.dev.naijalabs.net.keystore
+
+   NOTE :=====>	Update Jira Configuration
+
+ 	# sudo vim /opt/atlassian/jira/conf/server.xml
+
+	<Connector port="8443" relaxedPathChars="[]|" relaxedQueryChars="[]|{}^&#x5c;&#x60;&quot;&lt;&gt;" protocol="org.apache.coyote.http11.Http11NioProtocol"
+           maxThreads="150" SSLEnabled="true" scheme="https" secure="true"
+           clientAuth="false" sslProtocol="TLS"
+           keystoreFile="/path/to/jira.dev.naijalabs.net.keystore" keystorePass="your_keystore_password" />
+
+	NOTE :======> Open port 8443
+
+	# sudo firewall-cmd --permanent --add-port=8443/tcp --add-port=443/tcp
+
+	# sudo firewall-cmd --reload
+	
+###################################################################################################################################################################################
+	
+	
